@@ -64,7 +64,7 @@ export default function Home() {
       height: 350,
       type: "pie",
     },
-    labels,
+    labels: labels.length > 0 ? labels : ["No Expenses"], // Ensure labels always exist
     responsive: [
       {
         breakpoint: 480,
@@ -81,6 +81,7 @@ export default function Home() {
     legend: {
       position: "top",
       horizontalAlign: "center",
+      show: true, // Ensure the legend is visible
     },
     tooltip: {
       y: {

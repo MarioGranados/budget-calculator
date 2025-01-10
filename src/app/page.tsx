@@ -14,14 +14,12 @@ interface InputState {
 }
 
 export default function Home() {
-  // State variables to store income, expenses, and if there are stored expenses
   const [income, setIncome] = useState("");
   const [expenses, setExpenses] = useState<InputState[]>([
     { name: "", cost: "", description: "" },
   ]);
   const [hasStoredExpenses, setHasStoredExpenses] = useState<boolean>(false);
 
-  // Effect hook to check localStorage and load stored expenses if available
   useEffect(() => {
     if (typeof window !== "undefined") {
       const storedExpenses = localStorage.getItem("expenses");
@@ -32,7 +30,6 @@ export default function Home() {
     }
   }, []);
 
-  // Handler for input changes (for both name, cost, description)
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement>,
     index: number
@@ -46,15 +43,12 @@ export default function Home() {
     setExpenses(updatedExpenses);
   };
 
-  // Handler for form submission (stores expenses in localStorage)
   const handleSubmit = (e: React.FormEvent): void => {
     e.preventDefault();
-    console.log("Submitting expenses:", expenses); // Debug log to see the state
-    localStorage.setItem("expenses", JSON.stringify(expenses)); // Store expenses in localStorage
-    setHasStoredExpenses(true); // Update state to render the chart
+    localStorage.setItem("expenses", JSON.stringify(expenses));
+    setHasStoredExpenses(true);
   };
 
-  // Function to add more expense fields
   const addMoreExpenses = (): void => {
     setExpenses([
       ...expenses,
@@ -62,54 +56,55 @@ export default function Home() {
     ]);
   };
 
-  // Function to remove the last expense entry
   const removeExpense = (index: number): void => {
     setExpenses(expenses.filter((_, i) => i !== index));
   };
 
-  // Prepare chart data
   const series = expenses.map((expense) => parseFloat(expense.cost) || 0);
   const labels = expenses.map((expense) => expense.name || "Unknown");
 
-  // Chart options (customized for pie chart)
   const options: ApexOptions = {
     chart: {
       height: 350,
       type: "pie",
     },
-    labels: labels.length > 0 ? labels : ["No Expenses"], // Ensure labels are valid
+    labels: labels.length > 0 ? labels : ["No Expenses"],
     responsive: [
       {
-        breakpoint: 480, // Mobile breakpoint
+        breakpoint: 480,
         options: {
           chart: {
-            width: 300, // Adjust the width for smaller screens
+            width: "100%",
           },
           legend: {
-            show: true, // Ensure legend is explicitly shown
-            position: "bottom", // Position legend below chart for mobile
-            horizontalAlign: "center", // Center-align legend for mobile
+            show: true,
+            position: "bottom",
+            horizontalAlign: "center",
+            floating: false,
           },
         },
       },
     ],
     legend: {
-      show: true, // Ensure legend is always visible
-      position: "top", // Position legend above chart for desktop
-      horizontalAlign: "center", // Center-align legend for desktop
+      show: true,
+      position: "bottom",
+      horizontalAlign: "center",
+      floating: false,
     },
     tooltip: {
       y: {
-        formatter: (value: number) => `$${value.toFixed(2)}`, // Consistent formatting
+        formatter: (value: number) => `$${value.toFixed(2)}`,
       },
     },
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen mx-auto px-4">
+    <div className="flex flex-col items-center justify-center min-h-screen mx-auto px-4 bg-black text-white">
       {hasStoredExpenses ? (
         <>
-          <h1 className="text-xl font-semibold mb-4 text-center">Expense Distribution</h1>
+          <h1 className="text-xl font-semibold mb-4 text-center">
+            Expense Distribution
+          </h1>
           <ReactApexChart
             options={options}
             series={series}
@@ -133,7 +128,7 @@ export default function Home() {
           <form onSubmit={handleSubmit} className="w-full max-w-md">
             <div className="flex flex-col mb-4">
               <input
-                className="my-2 p-2 border rounded"
+                className="my-2 p-2 border rounded bg-gray-800 text-white"
                 type="text"
                 id="totalIncome"
                 name="totalIncome"
@@ -146,7 +141,7 @@ export default function Home() {
             {expenses.map((expense, index) => (
               <div key={index} className="mb-4">
                 <input
-                  className="mt-1 p-2 border rounded w-full"
+                  className="mt-1 p-2 border rounded w-full bg-gray-800 text-white"
                   type="text"
                   name="name"
                   placeholder="Expense Name"
@@ -154,7 +149,7 @@ export default function Home() {
                   onChange={(e) => handleChange(e, index)}
                 />
                 <input
-                  className="mt-1 p-2 border rounded w-full"
+                  className="mt-1 p-2 border rounded w-full bg-gray-800 text-white"
                   type="text"
                   name="cost"
                   placeholder="Cost"
@@ -162,7 +157,7 @@ export default function Home() {
                   onChange={(e) => handleChange(e, index)}
                 />
                 <input
-                  className="mt-1 p-2 border rounded w-full"
+                  className="mt-1 p-2 border rounded w-full bg-gray-800 text-white"
                   type="text"
                   name="description"
                   placeholder="Description"

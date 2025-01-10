@@ -14,78 +14,93 @@ interface InputState {
 }
 
 export default function Home() {
+  // State variables to store income, expenses, and if there are stored expenses
   const [income, setIncome] = useState("");
   const [expenses, setExpenses] = useState<InputState[]>([
     { name: "", cost: "", description: "" },
   ]);
-  const [hasStoredExpenses, setHasStoredExpenses] = useState(false);
+  const [hasStoredExpenses, setHasStoredExpenses] = useState<boolean>(false);
 
+  // Effect hook to check localStorage and load stored expenses if available
   useEffect(() => {
-    const storedExpenses = localStorage.getItem("expenses");
-    if (storedExpenses) {
-      setHasStoredExpenses(true);
-      setExpenses(JSON.parse(storedExpenses));
+    if (typeof window !== "undefined") {
+      const storedExpenses = localStorage.getItem("expenses");
+      if (storedExpenses) {
+        setHasStoredExpenses(true);
+        setExpenses(JSON.parse(storedExpenses));
+      }
     }
   }, []);
 
+  // Handler for input changes (for both name, cost, description)
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement>,
     index: number
   ) => {
     const { name, value } = e.target;
     const updatedExpenses = [...expenses];
-    updatedExpenses[index] = { ...updatedExpenses[index], [name]: value };
+    updatedExpenses[index] = {
+      ...updatedExpenses[index],
+      [name]: value,
+    };
     setExpenses(updatedExpenses);
   };
 
+  // Handler for form submission (stores expenses in localStorage)
   const handleSubmit = (e: React.FormEvent): void => {
     e.preventDefault();
-    localStorage.setItem("expenses", JSON.stringify(expenses));
-    setHasStoredExpenses(true);
+    console.log("Submitting expenses:", expenses); // Debug log to see the state
+    localStorage.setItem("expenses", JSON.stringify(expenses)); // Store expenses in localStorage
+    setHasStoredExpenses(true); // Update state to render the chart
   };
 
+  // Function to add more expense fields
   const addMoreExpenses = (): void => {
-    setExpenses([...expenses, { name: "", cost: "", description: "" }]);
+    setExpenses([
+      ...expenses,
+      { name: "", cost: "", description: "" },
+    ]);
   };
 
+  // Function to remove the last expense entry
   const removeExpense = (index: number): void => {
     setExpenses(expenses.filter((_, i) => i !== index));
   };
 
-  // Filter valid expenses for chart
-  const validExpenses = expenses.filter(
-    (expense) => expense.name.trim() && parseFloat(expense.cost) > 0
-  );
-  const series = validExpenses.map((expense) => parseFloat(expense.cost));
-  const labels = validExpenses.map((expense) => expense.name);
+  // Prepare chart data
+  const series = expenses.map((expense) => parseFloat(expense.cost) || 0);
+  const labels = expenses.map((expense) => expense.name || "Unknown");
 
+  // Chart options (customized for pie chart)
   const options: ApexOptions = {
     chart: {
       height: 350,
       type: "pie",
     },
-    labels: labels.length > 0 ? labels : ["No Expenses"], // Ensure labels always exist
+    labels: labels.length > 0 ? labels : ["No Expenses"], // Ensure labels are valid
     responsive: [
       {
-        breakpoint: 480,
+        breakpoint: 480, // Mobile breakpoint
         options: {
           chart: {
-            width: 200,
+            width: 300, // Adjust the width for smaller screens
           },
           legend: {
-            position: "bottom",
+            show: true, // Ensure legend is explicitly shown
+            position: "bottom", // Position legend below chart for mobile
+            horizontalAlign: "center", // Center-align legend for mobile
           },
         },
       },
     ],
     legend: {
-      position: "top",
-      horizontalAlign: "center",
-      show: true, // Ensure the legend is visible
+      show: true, // Ensure legend is always visible
+      position: "top", // Position legend above chart for desktop
+      horizontalAlign: "center", // Center-align legend for desktop
     },
     tooltip: {
       y: {
-        formatter: (value: number) => `$${value.toFixed(2)}`,
+        formatter: (value: number) => `$${value.toFixed(2)}`, // Consistent formatting
       },
     },
   };
@@ -95,11 +110,16 @@ export default function Home() {
       {hasStoredExpenses ? (
         <>
           <h1 className="text-xl font-semibold mb-4 text-center">Expense Distribution</h1>
-          <ReactApexChart options={options} series={series} type="pie" height={350} />
+          <ReactApexChart
+            options={options}
+            series={series}
+            type="pie"
+            height={350}
+          />
           <button
             onClick={() => {
               localStorage.removeItem("expenses");
-              setExpenses([{ name: "", cost: "", description: "" }]);
+              setExpenses([]);
               setHasStoredExpenses(false);
             }}
             className="mt-4 px-4 py-2 bg-red-500 text-white rounded"
@@ -122,6 +142,7 @@ export default function Home() {
                 value={income}
               />
             </div>
+
             {expenses.map((expense, index) => (
               <div key={index} className="mb-4">
                 <input
@@ -150,6 +171,7 @@ export default function Home() {
                 />
               </div>
             ))}
+
             <div className="mb-4 p-3 flex justify-between space-x-2">
               <button
                 className="p-3 mx-2 border bg-red-500 text-white rounded"
@@ -166,6 +188,7 @@ export default function Home() {
                 Add Expense
               </button>
             </div>
+
             <div className="mt-4 flex justify-center">
               <button
                 className="p-2 border bg-green-500 text-white rounded"

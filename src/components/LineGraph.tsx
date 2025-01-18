@@ -17,18 +17,28 @@ const LineGraph = () => {
   useEffect(() => {
     // Fetch values from localStorage
     const storedBalance = parseFloat(localStorage.getItem("remainingBalance") || "0");
-    const totalExpenses = parseFloat(localStorage.getItem("totalExpenses") || "0");
+    const storedExpenses = localStorage.getItem("expenses");
+    
+    const parsedExpenses = storedExpenses ? JSON.parse(storedExpenses) : [];
 
-    // Generate data over 12 months
-    if (!isNaN(storedBalance) && !isNaN(totalExpenses)) {
-      const balanceData = Array.from({ length: 12 }, (_, index) => (index + 1) * storedBalance);
-      const expensesData = Array.from({ length: 12 }, (_, index) => (index + 1) * totalExpenses);
+    if (!isNaN(storedBalance) && parsedExpenses.length > 0) {
+      // Initialize monthly savings data
+      let savings = 0;
+      const balanceData = Array.from({ length: 12 }, (_, index) => {
+        savings += storedBalance; // Add savings every month
+        return savings;
+      });
 
-      // Calculate investment growth with 8% monthly compounding interest
+      // Calculate total expenses for each month
+      const expensesData = Array.from({ length: 12 }, (_, index) => {
+        return parsedExpenses.reduce((acc, expense) => acc + parseFloat(expense.cost || "0"), 0) * (index + 1); // Cumulative expense each month
+      });
+
+      // Calculate investment growth (remaining balance + 8% interest each month)
       const investmentData = balanceData.reduce((acc, balance, index) => {
         const previous = acc[index - 1] || 0;
-        const current = (previous + balance) * 1.08; // Add balance and apply 8% growth
-        return [...acc, parseFloat(current.toFixed(2))]; // Fix to 2 decimal places
+        const current = (previous + balance) * 1.08; // Apply 8% growth each month
+        return [...acc, parseFloat(current.toFixed(2))];
       }, [] as number[]);
 
       setRemainingBalanceData(balanceData);
@@ -39,7 +49,7 @@ const LineGraph = () => {
 
   const series = [
     {
-      name: "Remaining Balance",
+      name: "Savings (Remaining Balance)",
       data: remainingBalanceData,
     },
     {
@@ -98,7 +108,7 @@ const LineGraph = () => {
         },
       },
     },
-    colors: ["#0000FF", "#FF0000", "#008000"], // Blue for Remaining Balance, Red for Total Expenses, Green for Investment Growth
+    colors: ["#0000FF", "#FF0000", "#008000"], // Blue for Savings, Red for Expenses, Green for Investment Growth
   };
 
   return (

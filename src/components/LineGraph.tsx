@@ -24,14 +24,14 @@ const LineGraph = () => {
     if (!isNaN(storedBalance) && parsedExpenses.length > 0) {
       // Initialize monthly savings data
       let savings = 0;
-      const balanceData = Array.from({ length: 12 }, (_, index) => {
+      const balanceData = Array.from({ length: 12 }, () => {
         savings += storedBalance; // Add savings every month
         return savings;
       });
 
       // Calculate total expenses for each month
-      const expensesData = Array.from({ length: 12 }, (_, index) => {
-        return parsedExpenses.reduce((acc, expense) => acc + parseFloat(expense.cost || "0"), 0) * (index + 1); // Cumulative expense each month
+      const expensesData = Array.from({ length: 12 }, () => {
+        return parsedExpenses.reduce((acc, expense) => acc + parseFloat(expense.cost || "0"), 0); // Cumulative expense each month
       });
 
       // Calculate investment growth (remaining balance + 8% interest each month)

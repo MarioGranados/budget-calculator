@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
-import { useRouter } from "next/navigation";
 import { ApexOptions } from "apexcharts";
 
 // Dynamically import ReactApexChart with ssr: false
@@ -17,7 +16,6 @@ interface Expense {
 }
 
 export default function PieChart() {
-  const router = useRouter();
   const [expenses, setExpenses] = useState<Expense[]>([]);
 
   useEffect(() => {
@@ -25,8 +23,6 @@ export default function PieChart() {
       const storedExpenses = localStorage.getItem("expenses");
       if (storedExpenses) {
         setExpenses(JSON.parse(storedExpenses));
-      } else {
-        router.push("/");
       }
     }
   }, []);
@@ -70,17 +66,13 @@ export default function PieChart() {
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-800 text-white">
       <h1 className="text-xl font-semibold mb-4">Expense Distribution</h1>
       <div className="my-4">
-        <ReactApexChart
-          options={options}
-          series={series}
-          type="donut"
-        />
+        <ReactApexChart options={options} series={series} type="donut" />
       </div>
 
       <button
         onClick={() => {
           localStorage.removeItem("expenses");
-          router.push("/");
+          window.location.reload(); // Reload the page to reflect the cleared data
         }}
         className="mt-4 px-4 py-2 bg-red-500 text-white rounded"
       >

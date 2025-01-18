@@ -9,6 +9,12 @@ const ReactApexChart = dynamic(() => import("react-apexcharts"), {
   ssr: false,
 });
 
+interface Expense {
+  name: string;
+  cost: string;
+  description: string;
+}
+
 const LineGraph = () => {
   const [remainingBalanceData, setRemainingBalanceData] = useState<number[]>([]);
   const [totalExpensesData, setTotalExpensesData] = useState<number[]>([]);
@@ -18,8 +24,8 @@ const LineGraph = () => {
     // Fetch values from localStorage
     const storedBalance = parseFloat(localStorage.getItem("remainingBalance") || "0");
     const storedExpenses = localStorage.getItem("expenses");
-    
-    const parsedExpenses = storedExpenses ? JSON.parse(storedExpenses) : [];
+
+    const parsedExpenses: Expense[] = storedExpenses ? JSON.parse(storedExpenses) : [];
 
     if (!isNaN(storedBalance) && parsedExpenses.length > 0) {
       // Initialize monthly savings data
@@ -31,7 +37,7 @@ const LineGraph = () => {
 
       // Calculate total expenses for each month
       const expensesData = Array.from({ length: 12 }, () => {
-        return parsedExpenses.reduce((acc, expense) => acc + parseFloat(expense.cost || "0"), 0); // Cumulative expense each month
+        return parsedExpenses.reduce((acc: number, expense) => acc + parseFloat(expense.cost || "0"), 0); // Cumulative expense each month
       });
 
       // Calculate investment growth (remaining balance + 8% interest each month)

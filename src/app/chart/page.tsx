@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 
@@ -8,25 +8,19 @@ import { useRouter } from "next/navigation";
 const LineGraph = dynamic(() => import("../../components/LineGraph"), { ssr: false });
 const BarGraph = dynamic(() => import("../../components/PieChart"), { ssr: false });
 
-interface InputState {
-  name: string;
-  cost: string;
-  description: string;
-}
-
 const ChartPage = () => {
   const router = useRouter();
-  const [income, setIncome] = useState<string | null>(null);
-  const [expenses, setExpenses] = useState<InputState[] | null>(null);
+  const [remainingBalance, setRemainingBalance] = useState<number | null>(null);
+  const [totalExpenses, setTotalExpenses] = useState<number | null>(null);
 
   useEffect(() => {
-    // Fetch stored values on load
-    const storedIncome = localStorage.getItem("income");
-    const storedExpenses = localStorage.getItem("expenses");
+    // Fetch values from localStorage
+    const storedRemainingBalance = parseFloat(localStorage.getItem("remainingBalance") || "0");
+    const storedTotalExpenses = parseFloat(localStorage.getItem("totalExpenses") || "0");
 
-    if (storedIncome && storedExpenses) {
-      setIncome(storedIncome);
-      setExpenses(JSON.parse(storedExpenses));
+    if (!isNaN(storedRemainingBalance) && !isNaN(storedTotalExpenses)) {
+      setRemainingBalance(storedRemainingBalance);
+      setTotalExpenses(storedTotalExpenses);
     } else {
       // Redirect to the home page if no data in localStorage
       router.push("/");
@@ -38,8 +32,8 @@ const ChartPage = () => {
     router.push("/");
   };
 
-  if (!income || !expenses) {
-    return null; // Wait for the useEffect to run
+  if (remainingBalance === null || totalExpenses === null) {
+    return null; // Wait for the useEffect to run and data to be loaded
   }
 
   return (
@@ -48,17 +42,10 @@ const ChartPage = () => {
       <div className="inputs-section">
         <h2>Expense Data</h2>
         <div>
-          <strong>Monthly Income:</strong> {income}
+          <strong>Remaining Balance:</strong> ${remainingBalance}
         </div>
         <div>
-          <strong>Expenses:</strong>
-          {expenses.map((expense, index) => (
-            <div key={index}>
-              <p>
-                <strong>{expense.name}</strong>: ${expense.cost} - {expense.description}
-              </p>
-            </div>
-          ))}
+          <strong>Total Expenses:</strong> ${totalExpenses}
         </div>
         <button onClick={clearDataAndGoHome} className="btn-clear">
           Clear Data & Go Home

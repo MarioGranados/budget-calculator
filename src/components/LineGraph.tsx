@@ -19,15 +19,19 @@ const LineGraph = () => {
   const [remainingBalanceData, setRemainingBalanceData] = useState<number[]>([]);
   const [totalExpensesData, setTotalExpensesData] = useState<number[]>([]);
   const [investmentGrowthData, setInvestmentGrowthData] = useState<number[]>([]);
+  const [expenses, setExpenses] = useState<Expense[]>([]); // Ensure expenses state is set
 
   useEffect(() => {
-    // Fetch values from localStorage
+    // Fetch stored values from localStorage
     const storedBalance = parseFloat(localStorage.getItem("remainingBalance") || "0");
     const storedExpenses = localStorage.getItem("expenses");
 
-    const parsedExpenses: Expense[] = storedExpenses ? JSON.parse(storedExpenses) : [];
+    if (storedExpenses) {
+      const parsedExpenses = JSON.parse(storedExpenses) as Expense[]; // Parse expenses correctly
+      setExpenses(parsedExpenses);
+    }
 
-    if (!isNaN(storedBalance) && parsedExpenses.length > 0) {
+    if (!isNaN(storedBalance) && expenses.length > 0) {
       // Initialize monthly savings data
       let savings = 0;
       const balanceData = Array.from({ length: 12 }, () => {
@@ -37,7 +41,11 @@ const LineGraph = () => {
 
       // Calculate total expenses for each month
       const expensesData = Array.from({ length: 12 }, () => {
-        return parsedExpenses.reduce((acc: number, expense) => acc + parseFloat(expense.cost || "0"), 0); // Cumulative expense each month
+        const totalExpenseForMonth = expenses.reduce((acc: number, expense) => {
+          const cost = parseFloat(expense.cost || "0");
+          return acc + cost;
+        }, 0);
+        return totalExpenseForMonth;
       });
 
       // Calculate investment growth (remaining balance + 8% interest each month)
@@ -51,7 +59,7 @@ const LineGraph = () => {
       setTotalExpensesData(expensesData);
       setInvestmentGrowthData(investmentData);
     }
-  }, []);
+  }, [expenses]); // Add expenses as dependency to re-trigger the effect when it changes
 
   const series = [
     {

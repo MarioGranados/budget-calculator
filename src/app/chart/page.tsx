@@ -16,115 +16,53 @@ interface InputState {
 
 const ChartPage = () => {
   const router = useRouter();
-  const [income, setIncome] = useState<string>("");
-  const [expenses, setExpenses] = useState<InputState[]>([
-    { name: "", cost: "", description: "" },
-  ]);
+  const [income, setIncome] = useState<string | null>(null);
+  const [expenses, setExpenses] = useState<InputState[] | null>(null);
 
   useEffect(() => {
     // Fetch stored values on load
     const storedIncome = localStorage.getItem("income");
     const storedExpenses = localStorage.getItem("expenses");
-    if (storedIncome) setIncome(storedIncome);
-    if (storedExpenses) setExpenses(JSON.parse(storedExpenses));
-  }, []);
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    index: number
-  ) => {
-    const { name, value } = e.target;
-    const updatedExpenses = [...expenses];
-    updatedExpenses[index] = {
-      ...updatedExpenses[index],
-      [name]: value,
-    };
-    setExpenses(updatedExpenses);
+    if (storedIncome && storedExpenses) {
+      setIncome(storedIncome);
+      setExpenses(JSON.parse(storedExpenses));
+    } else {
+      // Redirect to the home page if no data in localStorage
+      router.push("/");
+    }
+  }, [router]);
+
+  const clearDataAndGoHome = () => {
+    localStorage.clear();
+    router.push("/");
   };
 
-  const handleSubmit = (e: React.FormEvent): void => {
-    e.preventDefault();
-    localStorage.setItem("income", income);
-    localStorage.setItem("expenses", JSON.stringify(expenses));
-
-    const sumOfExpenses: number = expenses.reduce(
-      (acc, expense) => acc + parseFloat(expense.cost || "0"),
-      0
-    );
-    const remainingBalance: number = parseFloat(income || "0") - sumOfExpenses;
-    localStorage.setItem("remainingBalance", remainingBalance.toString());
-
-    alert("Inputs saved! Refresh graphs to see the updated data.");
-  };
-
-  const addMoreExpenses = (): void => {
-    setExpenses([...expenses, { name: "", cost: "", description: "" }]);
-  };
-
-  const removeExpense = (index: number): void => {
-    setExpenses(expenses.filter((_, i) => i !== index));
-  };
+  if (!income || !expenses) {
+    return null; // Wait for the useEffect to run
+  }
 
   return (
     <div className="chart-page-container">
       {/* Left Side: Inputs */}
       <div className="inputs-section">
-        <h2>Expense Calculator</h2>
-        <form onSubmit={handleSubmit}>
-          <div>
-            <input
-              type="text"
-              placeholder="Enter Your Monthly Income"
-              className="input"
-              value={income}
-              onChange={(e) => setIncome(e.target.value)}
-              required
-            />
-          </div>
+        <h2>Expense Data</h2>
+        <div>
+          <strong>Monthly Income:</strong> {income}
+        </div>
+        <div>
+          <strong>Expenses:</strong>
           {expenses.map((expense, index) => (
             <div key={index}>
-              <input
-                type="text"
-                name="name"
-                placeholder="Expense Name"
-                className="input"
-                value={expense.name}
-                onChange={(e) => handleChange(e, index)}
-              />
-              <input
-                type="text"
-                name="cost"
-                placeholder="Cost"
-                className="input"
-                value={expense.cost}
-                onChange={(e) => handleChange(e, index)}
-              />
-              <input
-                type="text"
-                name="description"
-                placeholder="Description"
-                className="input"
-                value={expense.description}
-                onChange={(e) => handleChange(e, index)}
-              />
+              <p>
+                <strong>{expense.name}</strong>: ${expense.cost} - {expense.description}
+              </p>
             </div>
           ))}
-          <div className="buttons">
-            <button type="button" onClick={addMoreExpenses} className="btn">
-              Add Expense
-            </button>
-            <button
-              type="button"
-              onClick={() => removeExpense(expenses.length - 1)}
-              className="btn"
-            >
-              Remove Last
-            </button>
-          </div>
-          <button type="submit" className="btn-submit">
-            Submit
-          </button>
-        </form>
+        </div>
+        <button onClick={clearDataAndGoHome} className="btn-clear">
+          Clear Data & Go Home
+        </button>
       </div>
 
       {/* Right Side: Graphs */}
@@ -165,31 +103,17 @@ const ChartPage = () => {
           padding: 20px;
           border-radius: 8px;
         }
-        .input {
-          display: block;
-          width: 100%;
-          margin: 10px 0;
+        .btn-clear {
           padding: 10px;
-          border: 1px solid #ccc;
-          border-radius: 4px;
-        }
-        .buttons {
-          display: flex;
-          gap: 10px;
-          margin-bottom: 10px;
-        }
-        .btn,
-        .btn-submit {
-          padding: 10px;
-          background-color: #007bff;
+          background-color: #ff4d4f;
           color: #fff;
           border: none;
           border-radius: 4px;
           cursor: pointer;
+          margin-top: 20px;
         }
-        .btn:hover,
-        .btn-submit:hover {
-          background-color: #0056b3;
+        .btn-clear:hover {
+          background-color: #d9363e;
         }
       `}</style>
     </div>

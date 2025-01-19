@@ -14,14 +14,11 @@ interface Expense {
 }
 
 const LineGraph = () => {
-  const [remainingBalanceData, setRemainingBalanceData] = useState<number[]>(
-    []
-  );
+  const [remainingBalanceData, setRemainingBalanceData] = useState<number[]>([]);
   const [totalExpensesData, setTotalExpensesData] = useState<number[]>([]);
   const [investmentGrowthData, setInvestmentGrowthData] = useState<number[]>(
     []
   );
-  const [expenses, setExpenses] = useState<Expense[]>([]);
   const [currentMonthIndex, setCurrentMonthIndex] = useState<number>(
     new Date().getMonth()
   ); // Current month index (0-11)
@@ -34,7 +31,6 @@ const LineGraph = () => {
 
     if (storedExpenses) {
       const parsedExpenses = JSON.parse(storedExpenses) as Expense[];
-      setExpenses(parsedExpenses);
 
       const totalMonthlyExpenses = parsedExpenses.reduce((total, expense) => {
         const cost = parseFloat(expense.cost || "0");
@@ -43,7 +39,6 @@ const LineGraph = () => {
 
       console.log("Total Monthly Expenses:", totalMonthlyExpenses);
 
-      // Generate dynamic months starting from the current month
       const months = [
         "Jan",
         "Feb",
@@ -57,11 +52,6 @@ const LineGraph = () => {
         "Oct",
         "Nov",
         "Dec",
-      ];
-
-      const categories = [
-        ...months.slice(currentMonthIndex),
-        ...months.slice(0, currentMonthIndex),
       ];
 
       // Calculate dynamic total expenses over 12 months
@@ -222,27 +212,27 @@ const LineGraph = () => {
       },
     ],
   };
-  
 
   return (
     <div className="p-5 rounded-lg bg-white dark:bg-gray-800 shadow-lg">
-    <h3 className="text-xl font-semibold text-gray-800 dark:text-white mb-4">Total Monthly Expenses</h3>
-    <div className="text-gray-800 dark:text-gray-300 mb-2">
-      <strong>Total Monthly Expenses: </strong>${totalExpensesData[0] || 0}
+      <h3 className="text-xl font-semibold text-gray-800 dark:text-white mb-4">
+        Total Monthly Expenses
+      </h3>
+      <div className="text-gray-800 dark:text-gray-300 mb-2">
+        <strong>Total Monthly Expenses: </strong>${totalExpensesData[0] || 0}
+      </div>
+      <div className="text-gray-800 dark:text-gray-300 mb-2">
+        <strong>Total Expenses Over 12 Months: </strong>${(totalExpensesData[11] || 0).toFixed(2)}
+      </div>
+      <div className="text-gray-800 dark:text-gray-300 mb-2">
+        <strong>Total Remaining Balance Over 12 Months: </strong>${remainingBalanceData.reduce((acc, val) => acc + val, 0).toFixed(2)}
+      </div>
+      <div className="text-gray-800 dark:text-gray-300 mb-4">
+        <strong>Total Savings with Stock Investment Over 12 Months: </strong>${investmentGrowthData.reduce((acc, val) => acc + val, 0).toFixed(2)}
+      </div>
+
+      <ReactApexChart type="line" options={options} series={series} />
     </div>
-    <div className="text-gray-800 dark:text-gray-300 mb-2">
-      <strong>Total Expenses Over 12 Months: </strong>${(totalExpensesData[11] || 0).toFixed(2)}
-    </div>
-    <div className="text-gray-800 dark:text-gray-300 mb-2">
-      <strong>Total Remaining Balance Over 12 Months: </strong>${remainingBalanceData.reduce((acc, val) => acc + val, 0).toFixed(2)}
-    </div>
-    <div className="text-gray-800 dark:text-gray-300 mb-4">
-      <strong>Total Savings with Stock Investment Over 12 Months: </strong>${investmentGrowthData.reduce((acc, val) => acc + val, 0).toFixed(2)}
-    </div>
-  
-    <ReactApexChart type="line" options={options} series={series} />
-  </div>
-  
   );
 };
 

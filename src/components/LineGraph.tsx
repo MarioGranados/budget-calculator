@@ -21,7 +21,6 @@ const LineGraph = () => {
   const [investmentGrowthData, setInvestmentGrowthData] = useState<number[]>(
     []
   );
-  const [expenses, setExpenses] = useState<Expense[]>([]);
   const currentMonthIndex = new Date().getMonth(); // Current month index (0-11)
 
   useEffect(() => {
@@ -32,7 +31,6 @@ const LineGraph = () => {
 
     if (storedExpenses) {
       const parsedExpenses = JSON.parse(storedExpenses) as Expense[];
-      setExpenses(parsedExpenses);
 
       const totalMonthlyExpenses = parsedExpenses.reduce((total, expense) => {
         const cost = parseFloat(expense.cost || "0");
@@ -59,7 +57,7 @@ const LineGraph = () => {
       if (!isNaN(storedBalance)) {
         // Calculate remaining balance over 12 months (starts with $1000 and decreases by total expenses every month)
         let savings = storedBalance;
-        const balanceData = Array.from({ length: 12 }, (_, monthIndex) => {
+        const balanceData = Array.from({ length: 12 }, (_, index) => {
           savings -= totalMonthlyExpenses; // Subtract monthly expenses
           return savings >= 0 ? savings : 0; // Ensure the balance doesn't go below 0
         });

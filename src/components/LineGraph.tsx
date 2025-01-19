@@ -39,16 +39,6 @@ const LineGraph = () => {
 
       console.log("Total Monthly Expenses:", totalMonthlyExpenses);
 
-      // Generate dynamic months starting from the current month
-      const months = [
-        "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
-      ];
-
-      const categories = [
-        ...months.slice(currentMonthIndex),
-        ...months.slice(0, currentMonthIndex),
-      ];
-
       // Calculate dynamic total expenses over 12 months
       const expensesData = Array.from({ length: 12 }, (_, i) => {
         return totalMonthlyExpenses * (i + 1); // Cumulative monthly total

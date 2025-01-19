@@ -34,16 +34,28 @@ export default function PieChart() {
   // ApexCharts options configuration
   const options: ApexOptions = {
     chart: {
-      height: 450,
       type: "donut",
+      height: '100%',  // Let the chart fill its container's height
     },
     labels: labels.length > 0 ? labels : ["No Expenses"],
     responsive: [
       {
-        breakpoint: 480,
+        breakpoint: 768, // Larger mobile/tablet breakpoint
         options: {
           chart: {
-            width: 200,
+            width: '100%',  // Make the chart fill 100% of the width on mobile
+          },
+          legend: {
+            position: "bottom",
+          },
+        },
+      },
+      {
+        breakpoint: 480, // Smallest mobile breakpoint
+        options: {
+          chart: {
+            width: '90%',  // Limit width to fit small screens
+            height: '250px',  // Set a fixed height to avoid the chart becoming too small
           },
           legend: {
             position: "bottom",
@@ -61,6 +73,8 @@ export default function PieChart() {
       },
     },
   };
+  
+  
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-800 text-white">

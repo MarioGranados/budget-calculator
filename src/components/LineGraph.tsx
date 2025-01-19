@@ -1,5 +1,3 @@
-"use client";
-
 import React, { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { ApexOptions } from "apexcharts";
@@ -19,47 +17,59 @@ const LineGraph = () => {
   const [remainingBalanceData, setRemainingBalanceData] = useState<number[]>([]);
   const [totalExpensesData, setTotalExpensesData] = useState<number[]>([]);
   const [investmentGrowthData, setInvestmentGrowthData] = useState<number[]>([]);
-  const [expenses, setExpenses] = useState<Expense[]>([]); // Ensure expenses state is set
+  const [expenses, setExpenses] = useState<Expense[]>([]);
+  const [currentMonthIndex, setCurrentMonthIndex] = useState<number>(new Date().getMonth()); // Current month index (0-11)
 
   useEffect(() => {
-    // Fetch stored values from localStorage
-    const storedBalance = parseFloat(localStorage.getItem("remainingBalance") || "0");
+    const storedBalance = parseFloat(localStorage.getItem("remainingBalance") || "1000"); // Assume $1000 as the initial balance
     const storedExpenses = localStorage.getItem("expenses");
 
     if (storedExpenses) {
-      const parsedExpenses = JSON.parse(storedExpenses) as Expense[]; // Parse expenses correctly
+      const parsedExpenses = JSON.parse(storedExpenses) as Expense[];
       setExpenses(parsedExpenses);
-    }
 
-    if (!isNaN(storedBalance) && expenses.length > 0) {
-      // Initialize monthly savings data
-      let savings = 0;
-      const balanceData = Array.from({ length: 12 }, () => {
-        savings += storedBalance; // Add savings every month
-        return savings;
+      const totalMonthlyExpenses = parsedExpenses.reduce((total, expense) => {
+        const cost = parseFloat(expense.cost || "0");
+        return total + cost;
+      }, 0);
+
+      console.log("Total Monthly Expenses:", totalMonthlyExpenses);
+
+      // Generate dynamic months starting from the current month
+      const months = [
+        "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+      ];
+
+      const categories = [...months.slice(currentMonthIndex), ...months.slice(0, currentMonthIndex)];
+
+      // Calculate dynamic total expenses over 12 months
+      const expensesData = Array.from({ length: 12 }, (_, index) => {
+        return totalMonthlyExpenses * (index + 1); // Cumulative monthly total
       });
 
-      // Calculate total expenses for each month
-      const expensesData = Array.from({ length: 12 }, () => {
-        const totalExpenseForMonth = expenses.reduce((acc: number, expense) => {
-          const cost = parseFloat(expense.cost || "0");
-          return acc + cost;
-        }, 0);
-        return totalExpenseForMonth;
-      });
+      if (!isNaN(storedBalance)) {
+        // Calculate remaining balance over 12 months (starts with $1000 and decreases by total expenses every month)
+        let savings = storedBalance;
+        const balanceData = Array.from({ length: 12 }, (_, monthIndex) => {
+          savings -= totalMonthlyExpenses; // Subtract monthly expenses
+          return savings >= 0 ? savings : 0; // Ensure the balance doesn't go below 0
+        });
 
-      // Calculate investment growth (remaining balance + 8% interest each month)
-      const investmentData = balanceData.reduce((acc, balance, index) => {
-        const previous = acc[index - 1] || 0;
-        const current = (previous + balance) * 1.08; // Apply 8% growth each month
-        return [...acc, parseFloat(current.toFixed(2))];
-      }, [] as number[]);
+        // Apply 8% annual interest, compounded annually but calculated monthly
+        const annualInterestRate = 0.08; // 8% annual interest rate
+        const investmentData: number[] = [];
+        let currentInvestment = storedBalance;
+        for (let i = 0; i < 12; i++) {
+          currentInvestment = (currentInvestment - totalMonthlyExpenses) * (1 + annualInterestRate / 12); // Apply monthly compounding
+          investmentData.push(parseFloat(currentInvestment.toFixed(2)));
+        }
 
-      setRemainingBalanceData(balanceData);
-      setTotalExpensesData(expensesData);
-      setInvestmentGrowthData(investmentData);
+        setRemainingBalanceData(balanceData);
+        setTotalExpensesData(expensesData);
+        setInvestmentGrowthData(investmentData);
+      }
     }
-  }, [expenses]); // Add expenses as dependency to re-trigger the effect when it changes
+  }, [currentMonthIndex]);
 
   const series = [
     {
@@ -71,14 +81,14 @@ const LineGraph = () => {
       data: totalExpensesData,
     },
     {
-      name: "Investment Growth (8% Monthly)",
+      name: "Investment Growth (8% Annual)",
       data: investmentGrowthData,
     },
   ];
 
   const options: ApexOptions = {
     chart: {
-      height: 350,
+      height: '100%',  // Set the chart height to 100% to fill its container
       type: "line",
       zoom: {
         enabled: false,
@@ -107,7 +117,10 @@ const LineGraph = () => {
     },
     xaxis: {
       categories: [
-        "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+        ...["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"].slice(
+          currentMonthIndex
+        ),
+        ...["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"].slice(0, currentMonthIndex),
       ],
       labels: {
         style: {
@@ -123,16 +136,84 @@ const LineGraph = () => {
       },
     },
     colors: ["#0000FF", "#FF0000", "#008000"], // Blue for Savings, Red for Expenses, Green for Investment Growth
+    legend: {
+      show: true,
+      position: "bottom", // Position the legend at the bottom
+      horizontalAlign: "center",
+      fontSize: "14px",
+      fontWeight: 600,
+      labels: {
+        colors: "#000",
+      },
+      itemMargin: {
+        horizontal: 5,
+        vertical: 5,
+      },
+    },
+    responsive: [
+      {
+        breakpoint: 768, // Larger mobile/tablet breakpoint
+        options: {
+          chart: {
+            width: '100%',  // Make the chart fill 100% of the width on mobile
+          },
+          title: {
+            align: "center", // Center the title for smaller screens
+          },
+          legend: {
+            position: "bottom",
+          },
+        },
+      },
+      {
+        breakpoint: 480, // Smallest mobile breakpoint
+        options: {
+          chart: {
+            width: '90%',  // Limit width to fit small screens
+            height: '250px',  // Set a fixed height to avoid the chart becoming too small
+          },
+          title: {
+            align: "center", // Center the title for smallest screens
+          },
+          legend: {
+            position: "bottom",
+          },
+        },
+      },
+    ],
   };
+  
 
   return (
     <div className="chart-container">
+      <h3>Total Monthly Expenses: ${totalExpensesData[0] || 0}</h3>
+      <h3>Total Expenses Over 12 Months: ${(totalExpensesData[11] || 0).toFixed(2)}</h3>
+      <h3>Total Remaining Balance Over 12 Months: ${remainingBalanceData.reduce((acc, val) => acc + val, 0).toFixed(2)}</h3>
+      <h3>Total Savings with Stock Investment Over 12 Months: ${investmentGrowthData.reduce((acc, val) => acc + val, 0).toFixed(2)}</h3>
+
       <ReactApexChart
         type="line"
         options={options}
         series={series}
-        height={350}
       />
+      <style jsx>{`
+        .chart-container {
+          padding: 20px;
+          width: 100%;
+        }
+
+        /* Mobile Responsive Styles */
+        @media (max-width: 768px) {
+          .chart-container {
+            padding: 10px;
+          }
+
+          .apexcharts-canvas {
+            width: 100% !important; /* Force the canvas to fill the container */
+            height: 100% !important; /* Make the canvas height 100% */
+          }
+        }
+      `}</style>
     </div>
   );
 };

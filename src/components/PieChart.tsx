@@ -35,28 +35,20 @@ export default function PieChart() {
   const options: ApexOptions = {
     chart: {
       type: "donut",
-      height: '100%',  // Let the chart fill its container's height
     },
     labels: labels.length > 0 ? labels : ["No Expenses"],
     responsive: [
       {
-        breakpoint: 768, // Larger mobile/tablet breakpoint
+        breakpoint: 768, 
         options: {
-          chart: {
-            width: '100%',  // Make the chart fill 100% of the width on mobile
-          },
           legend: {
             position: "bottom",
           },
         },
       },
       {
-        breakpoint: 480, // Smallest mobile breakpoint
+        breakpoint: 480, 
         options: {
-          chart: {
-            width: '90%',  // Limit width to fit small screens
-            height: '250px',  // Set a fixed height to avoid the chart becoming too small
-          },
           legend: {
             position: "bottom",
           },
@@ -74,24 +66,24 @@ export default function PieChart() {
     },
   };
   
-  
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-800 text-white">
-      <h1 className="text-xl font-semibold mb-4">Expense Distribution</h1>
-      <div className="my-4">
-        <ReactApexChart options={options} series={series} type="donut" />
-      </div>
+    <div className="p-5 rounded-lg bg-white dark:bg-gray-800 shadow-lg">
+  <h1 className="text-2xl font-semibold text-center text-gray-800 dark:text-white mb-4">Expense Distribution</h1>
+  <div className="chart-section flex justify-center mb-4">
+    <ReactApexChart options={options} series={series} type="donut" />
+  </div>
 
-      <button
-        onClick={() => {
-          localStorage.removeItem("expenses");
-          window.location.reload(); // Reload the page to reflect the cleared data
-        }}
-        className="mt-4 px-4 py-2 bg-red-500 text-white rounded"
-      >
-        Clear Data
-      </button>
-    </div>
+  <button
+    onClick={() => {
+      localStorage.removeItem("expenses");
+      window.location.reload();
+    }}
+    className="mt-4 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 mx-auto block"
+  >
+    Clear Data
+  </button>
+</div>
+
   );
 }

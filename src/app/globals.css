@@ -2,6 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Override background and foreground colors based on dark mode */
 :root {
   --background: #ffffff;
   --foreground: #171717;
@@ -15,61 +16,61 @@
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
-  font-size: 1rem; /* Default font size */
-  line-height: 1.5; /* Maintain readability */
+  @apply bg-white text-black font-sans text-base leading-relaxed;
 }
 
-/* Tailwind dark mode for inputs */
+/* Tailwind dark mode for body */
+@media (prefers-color-scheme: dark) {
+  body {
+    @apply bg-black text-white;
+  }
+}
+
+/* Tailwind form styling for input elements */
 input {
   @apply border border-gray-300 p-2 rounded-md;
 
-  /* Light mode styles */
+  /* Light mode styling (handled by Tailwind's dark variant) */
   background-color: var(--background);
   color: var(--foreground);
-
-  /* Dark mode styles */
-  @apply dark:bg-gray-800 dark:text-white dark:border-gray-600;
 }
 
 input:focus {
   @apply outline-none ring-2 ring-blue-500;
 }
 
-/* Global Responsiveness */
+/* Responsive font size for smaller screens */
 @media (max-width: 768px) {
   body {
-    font-size: 0.875rem; /* Smaller text on mobile */
+    @apply text-sm; /* Adjust font size on mobile */
   }
 
   h1 {
-    font-size: 1.5rem; /* Adjust heading sizes for smaller screens */
+    @apply text-2xl; /* Adjust heading sizes for smaller screens */
   }
 
   h2 {
-    font-size: 1.25rem;
+    @apply text-xl;
   }
 
   p {
-    font-size: 0.875rem; /* Smaller paragraphs */
+    @apply text-sm; /* Smaller paragraphs */
   }
 
   .btn-clear {
-    font-size: 0.875rem; /* Adjust button text size */
+    @apply text-sm; /* Adjust button text size */
   }
 
   .inputs-section {
-    font-size: 0.875rem; /* Smaller text in the input section */
+    @apply text-sm; /* Smaller text in the input section */
   }
 
   .graphs-section {
-    font-size: 0.875rem;
+    @apply text-sm;
   }
 
   .pie-graph,
   .line-graph {
-    font-size: 0.75rem; /* Reduce font size inside graphs */
+    @apply text-xs; /* Reduce font size inside graphs */
   }
 }

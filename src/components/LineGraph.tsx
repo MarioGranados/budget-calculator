@@ -14,14 +14,22 @@ interface Expense {
 }
 
 const LineGraph = () => {
-  const [remainingBalanceData, setRemainingBalanceData] = useState<number[]>([]);
+  const [remainingBalanceData, setRemainingBalanceData] = useState<number[]>(
+    []
+  );
   const [totalExpensesData, setTotalExpensesData] = useState<number[]>([]);
-  const [investmentGrowthData, setInvestmentGrowthData] = useState<number[]>([]);
+  const [investmentGrowthData, setInvestmentGrowthData] = useState<number[]>(
+    []
+  );
   const [expenses, setExpenses] = useState<Expense[]>([]);
-  const [currentMonthIndex, setCurrentMonthIndex] = useState<number>(new Date().getMonth()); // Current month index (0-11)
+  const [currentMonthIndex, setCurrentMonthIndex] = useState<number>(
+    new Date().getMonth()
+  ); // Current month index (0-11)
 
   useEffect(() => {
-    const storedBalance = parseFloat(localStorage.getItem("remainingBalance") || "1000"); // Assume $1000 as the initial balance
+    const storedBalance = parseFloat(
+      localStorage.getItem("remainingBalance") || "1000"
+    ); // Assume $1000 as the initial balance
     const storedExpenses = localStorage.getItem("expenses");
 
     if (storedExpenses) {
@@ -37,10 +45,24 @@ const LineGraph = () => {
 
       // Generate dynamic months starting from the current month
       const months = [
-        "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec",
       ];
 
-      const categories = [...months.slice(currentMonthIndex), ...months.slice(0, currentMonthIndex)];
+      const categories = [
+        ...months.slice(currentMonthIndex),
+        ...months.slice(0, currentMonthIndex),
+      ];
 
       // Calculate dynamic total expenses over 12 months
       const expensesData = Array.from({ length: 12 }, (_, index) => {
@@ -60,7 +82,9 @@ const LineGraph = () => {
         const investmentData: number[] = [];
         let currentInvestment = storedBalance;
         for (let i = 0; i < 12; i++) {
-          currentInvestment = (currentInvestment - totalMonthlyExpenses) * (1 + annualInterestRate / 12); // Apply monthly compounding
+          currentInvestment =
+            (currentInvestment - totalMonthlyExpenses) *
+            (1 + annualInterestRate / 12); // Apply monthly compounding
           investmentData.push(parseFloat(currentInvestment.toFixed(2)));
         }
 
@@ -88,7 +112,6 @@ const LineGraph = () => {
 
   const options: ApexOptions = {
     chart: {
-      height: '100%',  // Set the chart height to 100% to fill its container
       type: "line",
       zoom: {
         enabled: false,
@@ -117,10 +140,34 @@ const LineGraph = () => {
     },
     xaxis: {
       categories: [
-        ...["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"].slice(
-          currentMonthIndex
-        ),
-        ...["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"].slice(0, currentMonthIndex),
+        ...[
+          "Jan",
+          "Feb",
+          "Mar",
+          "Apr",
+          "May",
+          "Jun",
+          "Jul",
+          "Aug",
+          "Sep",
+          "Oct",
+          "Nov",
+          "Dec",
+        ].slice(currentMonthIndex),
+        ...[
+          "Jan",
+          "Feb",
+          "Mar",
+          "Apr",
+          "May",
+          "Jun",
+          "Jul",
+          "Aug",
+          "Sep",
+          "Oct",
+          "Nov",
+          "Dec",
+        ].slice(0, currentMonthIndex),
       ],
       labels: {
         style: {
@@ -154,9 +201,6 @@ const LineGraph = () => {
       {
         breakpoint: 768, // Larger mobile/tablet breakpoint
         options: {
-          chart: {
-            width: '100%',  // Make the chart fill 100% of the width on mobile
-          },
           title: {
             align: "center", // Center the title for smaller screens
           },
@@ -168,10 +212,6 @@ const LineGraph = () => {
       {
         breakpoint: 480, // Smallest mobile breakpoint
         options: {
-          chart: {
-            width: '90%',  // Limit width to fit small screens
-            height: '250px',  // Set a fixed height to avoid the chart becoming too small
-          },
           title: {
             align: "center", // Center the title for smallest screens
           },
@@ -185,36 +225,24 @@ const LineGraph = () => {
   
 
   return (
-    <div className="chart-container">
-      <h3>Total Monthly Expenses: ${totalExpensesData[0] || 0}</h3>
-      <h3>Total Expenses Over 12 Months: ${(totalExpensesData[11] || 0).toFixed(2)}</h3>
-      <h3>Total Remaining Balance Over 12 Months: ${remainingBalanceData.reduce((acc, val) => acc + val, 0).toFixed(2)}</h3>
-      <h3>Total Savings with Stock Investment Over 12 Months: ${investmentGrowthData.reduce((acc, val) => acc + val, 0).toFixed(2)}</h3>
-
-      <ReactApexChart
-        type="line"
-        options={options}
-        series={series}
-      />
-      <style jsx>{`
-        .chart-container {
-          padding: 20px;
-          width: 100%;
-        }
-
-        /* Mobile Responsive Styles */
-        @media (max-width: 768px) {
-          .chart-container {
-            padding: 10px;
-          }
-
-          .apexcharts-canvas {
-            width: 100% !important; /* Force the canvas to fill the container */
-            height: 100% !important; /* Make the canvas height 100% */
-          }
-        }
-      `}</style>
+    <div className="p-5 rounded-lg bg-white dark:bg-gray-800 shadow-lg">
+    <h3 className="text-xl font-semibold text-gray-800 dark:text-white mb-4">Total Monthly Expenses</h3>
+    <div className="text-gray-800 dark:text-gray-300 mb-2">
+      <strong>Total Monthly Expenses: </strong>${totalExpensesData[0] || 0}
     </div>
+    <div className="text-gray-800 dark:text-gray-300 mb-2">
+      <strong>Total Expenses Over 12 Months: </strong>${(totalExpensesData[11] || 0).toFixed(2)}
+    </div>
+    <div className="text-gray-800 dark:text-gray-300 mb-2">
+      <strong>Total Remaining Balance Over 12 Months: </strong>${remainingBalanceData.reduce((acc, val) => acc + val, 0).toFixed(2)}
+    </div>
+    <div className="text-gray-800 dark:text-gray-300 mb-4">
+      <strong>Total Savings with Stock Investment Over 12 Months: </strong>${investmentGrowthData.reduce((acc, val) => acc + val, 0).toFixed(2)}
+    </div>
+  
+    <ReactApexChart type="line" options={options} series={series} />
+  </div>
+  
   );
 };
 

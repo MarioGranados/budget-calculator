@@ -59,112 +59,43 @@ const ChartPage = () => {
   }
 
   return (
-    <div className="chart-page-container">
+    <div className="flex flex-col md:flex-row gap-10 p-5">
       {/* Left Side: Inputs */}
-      <div className="inputs-section">
-        <h2>Expense Data</h2>
-        <div>
-          <strong>Remaining Balance:</strong> ${remainingBalance}
+      <div className="flex-1 p-5 rounded-lg bg-white dark:bg-gray-800 shadow-lg flex justify-center items-center">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold text-gray-800 dark:text-white">
+            Expense Data
+          </h2>
+          <div className="text-gray-800 dark:text-gray-300">
+            <strong>Remaining Balance:</strong> ${remainingBalance}
+          </div>
+          <div className="text-gray-800 dark:text-gray-300">
+            <strong>Total Expenses:</strong> ${totalExpenses}
+          </div>
+          <div className="text-gray-800 dark:text-gray-300">
+            <strong>Remaining Balance After Expenses:</strong> $
+            {remainingBalanceAfterExpenses}
+          </div>
+          <button
+            onClick={clearDataAndGoHome}
+            className="mt-4 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+          >
+            Clear Data & Go Home
+          </button>
         </div>
-        <div>
-          <strong>Total Expenses:</strong> ${totalExpenses}
-        </div>
-        <div>
-          <strong>Remaining Balance After Expenses:</strong> $
-          {remainingBalanceAfterExpenses}
-        </div>
-        <button onClick={clearDataAndGoHome} className="btn-clear">
-          Clear Data & Go Home
-        </button>
       </div>
 
       {/* Right Side: Graphs */}
-      <div className="graphs-section">
-        <div className="pie-graph">
+      <div className="flex-1 flex flex-col md:flex-row gap-5">
+        {/* Pie Graph */}
+        <div className="p-5 rounded-lg bg-white dark:bg-gray-800 flex justify-center overflow-hidden shadow-lg">
           <BarGraph />
         </div>
-        <div className="line-graph">
+        {/* Line Graph */}
+        <div className="p-5 rounded-lg bg-white dark:bg-gray-800 flex justify-center overflow-hidden shadow-lg">
           <LineGraph />
         </div>
       </div>
-
-      <style jsx>{`
-        .chart-page-container {
-          display: grid;
-          grid-template-columns: 1fr 2fr;
-          grid-template-rows: auto auto;
-          gap: 20px;
-          padding: 20px;
-        }
-        .inputs-section {
-          grid-column: 1 / 2;
-          border: 1px solid #ccc;
-          padding: 20px;
-          border-radius: 8px;
-        }
-        .graphs-section {
-          grid-column: 2 / 3;
-          display: grid;
-          grid-template-rows: 1fr 1fr;
-          gap: 20px;
-        }
-        .pie-graph,
-        .line-graph {
-          border: 1px solid #ccc;
-          padding: 30px;
-          border-radius: 8px;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          max-width: 100%; /* Ensure the container is fully sized */
-          height: 400px; /* Adjust height to avoid overflow */
-          overflow: hidden; /* Hide overflow */
-        }
-
-        .btn-clear {
-          padding: 10px;
-          background-color: #ff4d4f;
-          color: #fff;
-          border: none;
-          border-radius: 4px;
-          cursor: pointer;
-          margin-top: 20px;
-        }
-        .btn-clear:hover {
-          background-color: #d9363e;
-        }
-
-        /* Mobile Responsive Styles */
-        @media (max-width: 768px) {
-          .chart-page-container {
-            grid-template-columns: 1fr;
-            grid-template-rows: auto auto auto;
-          }
-          .inputs-section {
-            grid-column: 1 / 2;
-            margin-bottom: 20px;
-          }
-          .inputs-section div {
-            font-size: 12px; /* Make the text smaller */
-          }
-          .graphs-section {
-            grid-column: 1 / 2;
-            display: grid;
-            grid-template-rows: 1fr 1fr;
-          }
-          .pie-graph,
-          .line-graph {
-            padding: 10px;
-            height: 500px; /* Reduce chart height on mobile */
-            width: 100%;
-
-          }
-
-          .btn-clear {
-            font-size: 12px; /* Make button text smaller */
-          }
-        }
-      `}</style>
     </div>
   );
 };

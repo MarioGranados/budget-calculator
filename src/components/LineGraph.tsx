@@ -50,14 +50,14 @@ const LineGraph = () => {
       ];
 
       // Calculate dynamic total expenses over 12 months
-      const expensesData = Array.from({ length: 12 }, (_, index) => {
-        return totalMonthlyExpenses * (index + 1); // Cumulative monthly total
+      const expensesData = Array.from({ length: 12 }, (_, i) => {
+        return totalMonthlyExpenses * (i + 1); // Cumulative monthly total
       });
 
       if (!isNaN(storedBalance)) {
         // Calculate remaining balance over 12 months (starts with $1000 and decreases by total expenses every month)
         let savings = storedBalance;
-        const balanceData = Array.from({ length: 12 }, (_, index) => {
+        const balanceData = Array.from({ length: 12 }, (_, i) => {
           savings -= totalMonthlyExpenses; // Subtract monthly expenses
           return savings >= 0 ? savings : 0; // Ensure the balance doesn't go below 0
         });

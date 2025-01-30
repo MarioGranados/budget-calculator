@@ -98,7 +98,7 @@ const ChartPage = () => {
 
         <div className="my-10 mx-10 space-y-4">
   <p>
-    If you are using this tool, know that I am not a financial advisor and don't have any credentials. I built this tool to estimate my yearly financial goals and explore different investment strategies for myself. This tool was created for my situation, but feel free to use it as you see fit.
+    If you are using this tool, know that I am not a financial advisor and don&apos; have any credentials. I built this tool to estimate my yearly financial goals and explore different investment strategies for myself. This tool was created for my situation, but feel free to use it as you see fit.
   </p>
   
   <p>

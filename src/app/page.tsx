@@ -66,6 +66,7 @@ export default function Home() {
             placeholder="Enter Your Monthly Income (After Taxes)"
             onChange={(e) => setIncome(e.target.value)}
             value={income}
+            required
           />
         </div>
 
@@ -78,6 +79,7 @@ export default function Home() {
               placeholder="Expense Name"
               value={expense.name}
               onChange={(e) => handleChange(e, index)}
+              required
             />
             <input
               className="mt-1 p-2 border rounded w-full bg-gray-50 text-black"
@@ -86,6 +88,7 @@ export default function Home() {
               placeholder="Cost"
               value={expense.cost}
               onChange={(e) => handleChange(e, index)}
+              required
             />
             <input
               className="mt-1 p-2 border rounded w-full bg-gray-50 text-black"

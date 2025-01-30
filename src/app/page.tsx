@@ -3,7 +3,6 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 
-
 interface InputState {
   name: string;
   cost: string;
@@ -33,13 +32,14 @@ export default function Home() {
   const handleSubmit = (e: React.FormEvent): void => {
     e.preventDefault();
     localStorage.setItem("expenses", JSON.stringify(expenses));
+    localStorage.setItem("income", income);
 
-    const sumOfExpenses: number = expenses.reduce(
+    const totalExpenses: number = expenses.reduce(
       (acc, expense) => acc + parseFloat(expense.cost),
       0
     ); // sum all the expenses
-    const remainingBalance: number = parseFloat(income) - sumOfExpenses;
-    localStorage.setItem("remainingBalance", remainingBalance.toString());
+    const incomeAfterExpenses: number = parseFloat(income) - totalExpenses;
+    localStorage.setItem("incomeAfterExpenses", incomeAfterExpenses.toString());
 
     router.push("/chart");
   };
@@ -53,16 +53,17 @@ export default function Home() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-black text-white">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 text-black">
+      <div className="block max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow-sm">
       <h1 className="text-center text-lg">Expense Calculator</h1>
       <form onSubmit={handleSubmit} className="w-full max-w-md">
         <div className="flex flex-col mb-4">
           <input
-            className="my-2 p-2 border rounded bg-gray-800 text-white"
+            className="my-2 p-2 border rounded bg-gray-50 text-black"
             type="text"
             id="totalIncome"
             name="totalIncome"
-            placeholder="Enter Your Monthly Income"
+            placeholder="Enter Your Monthly Income (After Taxes)"
             onChange={(e) => setIncome(e.target.value)}
             value={income}
           />
@@ -71,7 +72,7 @@ export default function Home() {
         {expenses.map((expense, index) => (
           <div key={index} className="mb-4">
             <input
-              className="mt-1 p-2 border rounded w-full bg-gray-800 text-white"
+              className="mt-1 p-2 border rounded w-full bg-gray-50 text-black"
               type="text"
               name="name"
               placeholder="Expense Name"
@@ -79,7 +80,7 @@ export default function Home() {
               onChange={(e) => handleChange(e, index)}
             />
             <input
-              className="mt-1 p-2 border rounded w-full bg-gray-800 text-white"
+              className="mt-1 p-2 border rounded w-full bg-gray-50 text-black"
               type="text"
               name="cost"
               placeholder="Cost"
@@ -87,7 +88,7 @@ export default function Home() {
               onChange={(e) => handleChange(e, index)}
             />
             <input
-              className="mt-1 p-2 border rounded w-full bg-gray-800 text-white"
+              className="mt-1 p-2 border rounded w-full bg-gray-50 text-black"
               type="text"
               name="description"
               placeholder="Description"
@@ -123,6 +124,7 @@ export default function Home() {
           </button>
         </div>
       </form>
+      </div>
     </div>
   );
 }

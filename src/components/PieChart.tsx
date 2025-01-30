@@ -37,27 +37,18 @@ export default function PieChart() {
       type: "donut",
     },
     labels: labels.length > 0 ? labels : ["No Expenses"],
-    responsive: [
-      {
-        breakpoint: 768, 
-        options: {
-          legend: {
-            position: "bottom",
-          },
-        },
-      },
-      {
-        breakpoint: 480, 
-        options: {
-          legend: {
-            position: "bottom",
-          },
-        },
-      },
-    ],
     legend: {
       position: "bottom",
       horizontalAlign: "center",
+      fontSize: "14px", // Increase font size
+      fontWeight: 700, // Make legend text bold
+      labels: {
+        colors: undefined, // Let CSS handle the color
+      },
+      itemMargin: {
+        horizontal: 5,
+        vertical: 5,
+      },
     },
     tooltip: {
       y: {
@@ -68,8 +59,10 @@ export default function PieChart() {
   
 
   return (
-    <div className="p-5 rounded-lg bg-white dark:bg-gray-800 shadow-lg">
-  <h1 className="text-2xl font-semibold text-center text-gray-800 dark:text-white mb-4">Expense Distribution</h1>
+<div >
+  <h1 className="text-2xl font-semibold text-center text-gray-800  mb-4">
+    Expense Distribution
+  </h1>
   <div className="chart-section flex justify-center mb-4">
     <ReactApexChart options={options} series={series} type="donut" />
   </div>

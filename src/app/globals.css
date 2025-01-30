@@ -2,75 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Override background and foreground colors based on dark mode */
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* Optional: Custom global styles */
+html {
+  scroll-behavior: smooth;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
-body {
-  @apply bg-white text-black font-sans text-base leading-relaxed;
-}
-
-/* Tailwind dark mode for body */
-@media (prefers-color-scheme: dark) {
-  body {
-    @apply bg-black text-white;
-  }
-}
-
-/* Tailwind form styling for input elements */
-input {
-  @apply border border-gray-300 p-2 rounded-md;
-
-  /* Light mode styling (handled by Tailwind's dark variant) */
-  background-color: var(--background);
-  color: var(--foreground);
-}
-
-input:focus {
-  @apply outline-none ring-2 ring-blue-500;
-}
-
-/* Responsive font size for smaller screens */
-@media (max-width: 768px) {
-  body {
-    @apply text-sm; /* Adjust font size on mobile */
-  }
-
-  h1 {
-    @apply text-2xl; /* Adjust heading sizes for smaller screens */
-  }
-
-  h2 {
-    @apply text-xl;
-  }
-
-  p {
-    @apply text-sm; /* Smaller paragraphs */
-  }
-
-  .btn-clear {
-    @apply text-sm; /* Adjust button text size */
-  }
-
-  .inputs-section {
-    @apply text-sm; /* Smaller text in the input section */
-  }
-
-  .graphs-section {
-    @apply text-sm;
-  }
-
-  .pie-graph,
-  .line-graph {
-    @apply text-xs; /* Reduce font size inside graphs */
-  }
+/* Ensure dark mode works when using 'class' mode */
+.dark {
+  color-scheme: dark;
 }

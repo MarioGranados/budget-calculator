@@ -1,201 +1,77 @@
 import React, { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { ApexOptions } from "apexcharts";
+import { calculateFinancialData } from "@/app/utils/calculateFinancialData";
 
-// Dynamically import ReactApexChart with ssr: false
-const ReactApexChart = dynamic(() => import("react-apexcharts"), {
-  ssr: false,
-});
-
-interface Expense {
-  name: string;
-  cost: string;
-  description: string;
-}
+const ReactApexChart = dynamic(() => import("react-apexcharts"), { ssr: false });
 
 const LineGraph = () => {
-  const [remainingBalanceData, setRemainingBalanceData] = useState<number[]>(
-    []
-  );
+  const [investmentPercentage, setInvestmentPercentage] = useState(15);
+  const [remainingBalanceData, setRemainingBalanceData] = useState<number[]>([]);
   const [totalExpensesData, setTotalExpensesData] = useState<number[]>([]);
-  const [investmentGrowthData, setInvestmentGrowthData] = useState<number[]>(
-    []
-  );
-  const currentMonthIndex = new Date().getMonth(); // Current month index (0-11)
+  const [investmentGrowthData, setInvestmentGrowthData] = useState<number[]>([]);
+  const currentMonthIndex = new Date().getMonth();
 
   useEffect(() => {
-    const storedBalance = parseFloat(
-      localStorage.getItem("remainingBalance") || "1000"
-    ); // Assume $1000 as the initial balance
-    const storedExpenses = localStorage.getItem("expenses");
+    const income = parseFloat(localStorage.getItem("income") || "0");
+    const expenses = localStorage.getItem("expenses");
+    const parsedExpenses: { name: string; cost: string; description?: string }[] = expenses ? JSON.parse(expenses) : [];
 
-    if (storedExpenses) {
-      const parsedExpenses = JSON.parse(storedExpenses) as Expense[];
+    if (!isNaN(income)) {
+      const { balanceData, investmentData, monthlyExpensesData } = calculateFinancialData(
+        income,
+        parsedExpenses,
+        investmentPercentage
+      );
 
-      const totalMonthlyExpenses = parsedExpenses.reduce((total, expense) => {
-        const cost = parseFloat(expense.cost || "0");
-        return total + cost;
-      }, 0);
+      console.log(calculateFinancialData(income, parsedExpenses, investmentPercentage))
 
-      console.log("Total Monthly Expenses:", totalMonthlyExpenses);
-
-      // Calculate dynamic total expenses over 12 months
-      const expensesData = Array.from({ length: 12 }, () => {
-        return totalMonthlyExpenses * 1; // Cumulative monthly total
-      });
-
-      if (!isNaN(storedBalance)) {
-        // Calculate remaining balance over 12 months (starts with $1000 and decreases by total expenses every month)
-        let savings = storedBalance;
-        const balanceData = Array.from({ length: 12 }, () => {
-          savings -= totalMonthlyExpenses; // Subtract monthly expenses
-          return savings >= 0 ? savings : 0; // Ensure the balance doesn't go below 0
-        });
-
-        // Apply 8% annual interest, compounded annually but calculated monthly
-        const annualInterestRate = 0.08; // 8% annual interest rate
-        const investmentData: number[] = [];
-        let currentInvestment = storedBalance;
-        for (let i = 0; i < 12; i++) {
-          currentInvestment =
-            (currentInvestment - totalMonthlyExpenses) *
-            (1 + annualInterestRate / 12); // Apply monthly compounding
-          investmentData.push(parseFloat(currentInvestment.toFixed(2)));
-        }
-
-        setRemainingBalanceData(balanceData);
-        setTotalExpensesData(expensesData);
-        setInvestmentGrowthData(investmentData);
-      }
+      setRemainingBalanceData(balanceData);
+      setTotalExpensesData(monthlyExpensesData); // Keep this fixed, as initial total monthly expenses are required
+      setInvestmentGrowthData(investmentData);
     }
-  }, [currentMonthIndex]);
+  }, [investmentPercentage]);
 
-  const series = [
-    {
-      name: "Savings (Remaining Balance)",
-      data: remainingBalanceData,
-    },
-    {
-      name: "Total Expenses",
-      data: totalExpensesData,
-    },
-    {
-      name: "Investment Growth (8% Annual)",
-      data: investmentGrowthData,
-    },
-  ];
+const series = [
+  { name: "Savings (Remaining Balance)", data: remainingBalanceData, color: "#007bff" }, // Blue
+  { name: "Total Expenses", data: totalExpensesData, color: "#ff0000" }, // Red
+  { name: "Investment Growth", data: investmentGrowthData, color: "#28a745" }, // Green
+];
+
 
   const options: ApexOptions = {
-    chart: {
-      type: "line",
-      zoom: {
-        enabled: false,
-      },
-      background: "#fff",
-    },
-    dataLabels: {
-      enabled: false,
-    },
-    stroke: {
-      curve: "straight",
-    },
-    title: {
-      text: "Financial Overview with Investment Growth",
-      align: "left",
-      style: {
-        color: "#000",
-      },
-    },
-    grid: {
-      row: {
-        colors: ["#f3f3f3", "transparent"],
-        opacity: 0.5,
-      },
-      borderColor: "#000",
-    },
+    chart: { type: "line", zoom: { enabled: false } },
+    dataLabels: { enabled: false },
+    stroke: { curve: "straight" },
+    title: { text: "Financial Overview with Investment Growth", align: "left" },
     xaxis: {
       categories: [
-        ...[
-          "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
-        ].slice(currentMonthIndex),
-        ...[
-          "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
-        ].slice(0, currentMonthIndex),
-      ],
-      labels: {
-        style: {
-          colors: "#000",
-        },
-      },
+        ...["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"].slice(currentMonthIndex),
+        ...["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"].slice(0, currentMonthIndex),
+      ].slice(0, 12),
     },
-    yaxis: {
-      labels: {
-        style: {
-          colors: "#000",
-        },
-      },
-    },
-    colors: ["#0000FF", "#FF0000", "#008000"], // Blue for Savings, Red for Expenses, Green for Investment Growth
-    legend: {
-      show: true,
-      position: "bottom", // Position the legend at the bottom
-      horizontalAlign: "center",
-      fontSize: "14px",
-      fontWeight: 600,
-      labels: {
-        colors: "#000",
-      },
-      itemMargin: {
-        horizontal: 5,
-        vertical: 5,
-      },
-    },
-    responsive: [
-      {
-        breakpoint: 768, // Larger mobile/tablet breakpoint
-        options: {
-          title: {
-            align: "center", // Center the title for smaller screens
-          },
-          legend: {
-            position: "bottom",
-          },
-        },
-      },
-      {
-        breakpoint: 480, // Smallest mobile breakpoint
-        options: {
-          title: {
-            align: "center", // Center the title for smallest screens
-          },
-          legend: {
-            position: "bottom",
-          },
-        },
-      },
-    ],
+    yaxis: { labels: { formatter: (value) => `$${value.toFixed(2)}` } },
   };
 
   return (
-    <div className="p-5 rounded-lg bg-white dark:bg-gray-800 shadow-lg">
-      <h3 className="text-xl font-semibold text-gray-800 dark:text-white mb-4">
-        Total Monthly Expenses
+    <div className="p-5 rounded-lg bg-white text-black relative">
+      <div className="absolute top-2 right-2 flex flex-col items-end">
+        <label className="block text-gray-700  text-sm mb-1">
+          Percent from savings to invest (after expenses): {investmentPercentage}%
+        </label>
+        <input
+          type="range"
+          value={investmentPercentage}
+          onChange={(e) => setInvestmentPercentage(parseInt(e.target.value))}
+          min={0}
+          max={100}
+          className="w-32 cursor-pointer"
+        />
+      </div>
+      <h3 className="text-xl font-semibold text-gray-800  mb-4">
+        Financial Overview
       </h3>
-      <div className="text-gray-800 dark:text-gray-300 mb-2">
-        <strong>Total Monthly Expenses: </strong>${totalExpensesData[0] || 0}
-      </div>
-      <div className="text-gray-800 dark:text-gray-300 mb-2">
-        <strong>Total Expenses Over 12 Months: </strong>
-        ${(totalExpensesData[11] || 0).toFixed(2)}
-      </div>
-      <div className="text-gray-800 dark:text-gray-300 mb-2">
-        <strong>Total Remaining Balance Over 12 Months: </strong>
-        ${remainingBalanceData.reduce((acc, val) => acc + val, 0).toFixed(2)}
-      </div>
-      <div className="text-gray-800 dark:text-gray-300 mb-4">
-        <strong>Total Savings with Stock Investment Over 12 Months: </strong>
-        ${investmentGrowthData.reduce((acc, val) => acc + val, 0).toFixed(2)}
-      </div>
+      
 
       <ReactApexChart type="line" options={options} series={series} />
     </div>

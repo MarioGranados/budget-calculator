@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
+import axios from '@/lib/axios'; // Ensure you're using your axios.ts instance
 
 // Dynamically import the charts with ssr: false
 const LineGraph = dynamic(() => import("../../components/LineGraph"), {
@@ -20,33 +21,49 @@ const ChartPage = () => {
     useState<number | null>(null);
 
   useEffect(() => {
-    // Fetch values from localStorage
-    const incomeAfterExpenses = parseFloat(
-      localStorage.getItem("incomeAfterExpenses") || "0"
-    );
-    const storedExpenses = localStorage.getItem("expenses");
+    const fetchUserData = async () => {
+      try {
+        const token = localStorage.getItem('token'); // Assuming the token is stored in localStorage
 
-    if (storedExpenses) {
-      const parsedExpenses = JSON.parse(storedExpenses) as { cost: string }[];
-      const totalExpenses = parsedExpenses.reduce((total, expense) => {
-        return total + parseFloat(expense.cost || "0");
-      }, 0);
+        // Fetch income data
+        const incomeResponse = await axios.get("/api/users/get-income", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        const incomeAfterExpenses = incomeResponse.data.income;
 
-      setTotalExpenses(totalExpenses);
-
-      // Calculate remaining balance after expenses
-      if (!isNaN(incomeAfterExpenses)) {
-        const remainingBalanceAfterExpenses =
-          incomeAfterExpenses - totalExpenses;
-        setRemainingBalance(incomeAfterExpenses);
-        setRemainingBalanceAfterExpenses(
-          remainingBalanceAfterExpenses >= 0 ? remainingBalanceAfterExpenses : 0
+        // Fetch expenses data
+        const expensesResponse = await axios.get("/api/expenses/user-expenses", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        const expenses = expensesResponse.data;
+        const totalExpenses = expenses.reduce(
+          (total: number, expense: { cost: string }) =>
+            total + parseFloat(expense.cost || "0"),
+          0
         );
+
+        setTotalExpenses(totalExpenses);
+
+        // Calculate remaining balance after expenses
+        if (!isNaN(incomeAfterExpenses)) {
+          const remainingBalanceAfterExpenses =
+            incomeAfterExpenses - totalExpenses;
+          setRemainingBalance(incomeAfterExpenses);
+          setRemainingBalanceAfterExpenses(
+            remainingBalanceAfterExpenses >= 0 ? remainingBalanceAfterExpenses : 0
+          );
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+        // Optionally handle the error by redirecting or showing a message
       }
-    } else {
-      // Redirect to the home page if no expenses data in localStorage
-      router.push("/");
-    }
+    };
+
+    fetchUserData();
   }, [router]);
 
   const clearDataAndGoHome = () => {
@@ -97,24 +114,41 @@ const ChartPage = () => {
         </div>
 
         <div className="my-10 mx-10 space-y-4">
-  <p>
-    If you are using this tool, know that I am not a financial advisor and don&apos; have any credentials. I built this tool to estimate my yearly financial goals and explore different investment strategies for myself. This tool was created for my situation, but feel free to use it as you see fit.
-  </p>
-  
-  <p>
-    If you would like to modify the code or use it for yourself, you can do so 
-    <a href="http://" className="text-blue-500 hover:underline"> here</a>.
-  </p>
-  
-  <p>The graph below shows:</p>
-  
-  <ul className="list-disc pl-5 space-y-2">
-    <li>Expense over 12 months - mostly just used to see how much I spend a year</li>
-    <li>Income after expenses over 12 months - I use this to determine my needs and wants</li>
-    <li>Contribution to a savings account - I was recommended to save 15% of my income, feel free to change it via the slider</li>
-  </ul>
-</div>
+          <p>
+            If you are using this tool, know that I am not a financial advisor
+            and don&apos; have any credentials. I built this tool to estimate my
+            yearly financial goals and explore different investment strategies
+            for myself. This tool was created for my situation, but feel free to
+            use it as you see fit.
+          </p>
 
+          <p>
+            If you would like to modify the code or use it for yourself, you can
+            do so
+            <a href="http://" className="text-blue-500 hover:underline">
+              {" "}
+              here
+            </a>
+            .
+          </p>
+
+          <p>The graph below shows:</p>
+
+          <ul className="list-disc pl-5 space-y-2">
+            <li>
+              Expense over 12 months - mostly just used to see how much I spend
+              a year
+            </li>
+            <li>
+              Income after expenses over 12 months - I use this to determine my
+              needs and wants
+            </li>
+            <li>
+              Contribution to a savings account - I was recommended to save 15%
+              of my income, feel free to change it via the slider
+            </li>
+          </ul>
+        </div>
 
         {/* Bottom Section: Line Graph */}
         <div className="p-5 rounded-lg shadow-lg">

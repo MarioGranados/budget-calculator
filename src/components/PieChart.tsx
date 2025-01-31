@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
+import axios from '@/lib/axios'; // Ensure you're using your axios.ts instance
 import { ApexOptions } from "apexcharts";
 
 // Dynamically import ReactApexChart with ssr: false
@@ -18,13 +19,18 @@ interface Expense {
 export default function PieChart() {
   const [expenses, setExpenses] = useState<Expense[]>([]);
 
+  // Fetch expenses from the backend when the component mounts
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const storedExpenses = localStorage.getItem("expenses");
-      if (storedExpenses) {
-        setExpenses(JSON.parse(storedExpenses));
+    const fetchExpenses = async () => {
+      try {
+        const response = await axios.get("/api/expenses/user-expenses"); // Adjust API endpoint as necessary
+        setExpenses(response.data); // Set the expenses data in state
+      } catch (error) {
+        console.error("Failed to fetch expenses:", error);
       }
-    }
+    };
+
+    fetchExpenses();
   }, []);
 
   // Map expenses to series and labels for ApexCharts
@@ -56,27 +62,25 @@ export default function PieChart() {
       },
     },
   };
-  
 
   return (
-<div >
-  <h1 className="text-2xl font-semibold text-center text-gray-800  mb-4">
-    Expense Distribution
-  </h1>
-  <div className="chart-section flex justify-center mb-4">
-    <ReactApexChart options={options} series={series} type="donut" />
-  </div>
+    <div>
+      <h1 className="text-2xl font-semibold text-center text-gray-800 mb-4">
+        Expense Distribution
+      </h1>
+      <div className="chart-section flex justify-center mb-4">
+        <ReactApexChart options={options} series={series} type="donut" />
+      </div>
 
-  <button
-    onClick={() => {
-      localStorage.removeItem("expenses");
-      window.location.reload();
-    }}
-    className="mt-4 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 mx-auto block"
-  >
-    Clear Data
-  </button>
-</div>
-
+      <button
+        onClick={() => {
+          localStorage.removeItem("expenses");
+          window.location.reload();
+        }}
+        className="mt-4 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 mx-auto block"
+      >
+        Clear Data
+      </button>
+    </div>
   );
 }

@@ -73,9 +73,16 @@ export default function Home() {
 
       // Redirect to the chart page after successful submission
       router.push("/chart");
-    } catch (err) {
-      console.error("Error submitting expenses:", err);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        console.error("Error submitting expenses:", err.message);
+      } else {
+        console.error("Error submitting expenses:", err);
+      }
     }
+    
+    
+    
   };
 
   const addMoreExpenses = (): void => {

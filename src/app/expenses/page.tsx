@@ -13,7 +13,6 @@ interface Expense {
 const ExpensesPage = () => {
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     // Fetch the user's expenses
@@ -21,9 +20,15 @@ const ExpensesPage = () => {
       try {
         const response = await axios.get('/api/expenses/user-expenses');
         setExpenses(response.data.expenses); // Access expenses from the response data
-      } catch (err) {
-        setError('Failed to fetch expenses');
-      } finally {
+      } catch (err: unknown) {
+        if (err instanceof Error) {
+          console.error("Error submitting expenses:", err.message);
+        } else {
+          console.error("Error submitting expenses:", err);
+        }
+      }
+      
+       finally {
         setLoading(false);
       }
     };
@@ -35,13 +40,18 @@ const ExpensesPage = () => {
     try {
       await axios.delete(`/api/expenses/delete-expense/${id}`);
       setExpenses((prevExpenses) => prevExpenses.filter((expense) => expense._id !== id)); // Remove the deleted expense
-    } catch (err) {
-      setError('Failed to delete the expense');
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        console.error("Error submitting expenses:", err.message);
+      } else {
+        console.error("Error submitting expenses:", err);
+      }
     }
+    
+    
   };
 
   if (loading) return <div>Loading...</div>;
-  if (error) return <div className="text-red-500">{error}</div>;
 
   return (
     <div className="w-full max-w-screen-xl mx-auto py-10">

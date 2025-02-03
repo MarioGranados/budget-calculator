@@ -14,7 +14,7 @@ export default function PieChart() {
   const { expenses } = useFinance(); // Get expenses from context
 
   // If expenses data is null or undefined, set to an empty array to avoid errors
-  const expenseList = expenses || [];
+  let expenseList = expenses || [];
 
   // Map expenses to series and labels for ApexCharts
   const series = expenseList.map((expense) => parseFloat(expense.cost) || 0);

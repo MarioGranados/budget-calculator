@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import axios from '@/lib/axios'; // Ensure you're using your axios.ts instance
+import axios from "@/lib/axios"; // Ensure you're using your axios.ts instance
 
 interface InputState {
   name: string;
@@ -40,17 +40,20 @@ export default function Home() {
     const incomeAfterExpenses: number = parseFloat(income) - totalExpenses;
     localStorage.setItem("incomeAfterExpenses", incomeAfterExpenses.toString());
 
+    // Get the token from localStorage
+    const token = localStorage.getItem("token");
+
+    // If user is not authenticated, store the data in localStorage and return
+    if (!token) {
+      // Store income and expenses in localStorage
+      localStorage.setItem("income", income);
+      localStorage.setItem("expenses", JSON.stringify(expenses));
+      router.push('/chart')
+      return;
+    }
+
     try {
-      // Get the token from localStorage
-      const token = localStorage.getItem("token");
-
-      // Ensure there's a token before making the request
-      if (!token) {
-        console.error("No token found");
-        return;
-      }
-
-      // Make the POST request to add expenses to the backend
+      // If authenticated, make the API request to submit the expenses and income
       await axios.post(
         `/api/expenses/add-expenses`, // Backend API endpoint
         { expenses }, // Send the expenses array
@@ -80,9 +83,6 @@ export default function Home() {
         console.error("Error submitting expenses:", err);
       }
     }
-    
-    
-    
   };
 
   const addMoreExpenses = (): void => {

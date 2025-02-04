@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import axios from "@/lib/axios";
+import { useAuth } from "@/context/AuthContext"; // Assuming you have an AuthContext for login
 
 const Register = () => {
   const [username, setUsername] = useState("");
@@ -12,21 +13,15 @@ const Register = () => {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const { login } = useAuth(); // Use the login function from AuthContext
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
 
-    // Validate confirm password length (commented out for now)
-    // if (confirmPassword.length < 8) {
-    //   setError("Confirm password must be at least 8 characters.");
-    //   setLoading(false);
-    //   return;
-    // }
-
     try {
-      // Make API call to register the user
+      // Register the user
       const response = await axios.post("/api/users/register", {
         username,
         email,
@@ -34,12 +29,13 @@ const Register = () => {
       });
 
       if (response.status === 200) {
-        // Redirect to the login page after successful registration
-        router.push("/login");
+        // Log in the user immediately after successful registration
+        await login(email, password);
+        router.push("/login/verify"); // Redirect to dashboard after successful login
       }
     } catch (err) {
-      console.error("Registration failed:", err);
-      setError("Error during registration");
+      console.error("Registration or login failed:", err);
+      setError("Error during registration or login");
     } finally {
       setLoading(false);
     }

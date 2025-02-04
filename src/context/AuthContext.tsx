@@ -1,15 +1,12 @@
 "use client";
-
 import React, { createContext, useContext, useEffect, useState } from "react";
 import axios from "@/lib/axios";
 import { useRouter } from "next/navigation";
 
-// Define a User interface based on the response structure (adjust as needed)
 interface User {
   id: string;
   email: string;
   name: string;
-  // Add other properties as needed
 }
 
 interface AuthContextType {
@@ -31,22 +28,45 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const storedToken = localStorage.getItem("token");
     if (storedToken) {
       setToken(storedToken);
-      // fetchUserData(storedToken); 
+      fetchUserData(storedToken); // Fetch user data if token exists
     }
   }, []);
 
+  const fetchUserData = async (token: string) => {
+    try {
+      const response = await axios.get("/api/users/me", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setUser(response.data.user);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        console.error("Failed to fetch user data:", err.message);
+      } else {
+        console.error("Failed to fetch user data:", err);
+      }
+      setUser(null); // Set user to null in case of an error
+    }
+  };
+
   const login = async (email: string, password: string) => {
     try {
-      const response = await axios.post("/api/users/login", { email, password });
+      const response = await axios.post("/api/users/login", {
+        email,
+        password,
+      });
 
       // Store token in localStorage
       localStorage.setItem("token", response.data.token);
 
-      // Set token (no user data fetch here)
+      // Set token and user
       setToken(response.data.token);
-      setUser(response.data.user)
+      setUser(response.data.user);
     } catch (err: any) {
-      console.error("Login failed:", err.message || err);
+      if (err instanceof Error) {
+        console.error("Login failed:", err.message);
+      } else {
+        console.error("Login failed:", err);
+      }
     }
   };
 
@@ -57,11 +77,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     router.push("/login"); // Redirect to login page
   };
 
-  // Set isAuthenticated based on token and user
   const isAuthenticated = !!token && !!user;
 
   return (
-    <AuthContext.Provider value={{ user, token, login, logout, isAuthenticated }}>
+    <AuthContext.Provider
+      value={{ user, token, login, logout, isAuthenticated }}
+    >
       {children}
     </AuthContext.Provider>
   );

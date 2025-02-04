@@ -82,7 +82,7 @@ const Register = () => {
         </div>
 
         {/* Uncomment to enforce confirm password validation */}
-        {/* <div className="mb-4">
+        <div className="mb-4">
           <label htmlFor="confirmPassword" className="block text-sm font-medium">Confirm Password</label>
           <input
             type="password"
@@ -92,7 +92,7 @@ const Register = () => {
             className="w-full px-4 py-2 border border-gray-300 rounded-md"
             required
           />
-        </div> */}
+        </div>
 
         {error && <p className="text-red-500 text-sm">{error}</p>}
 

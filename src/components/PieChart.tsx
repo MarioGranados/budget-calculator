@@ -1,6 +1,5 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { ApexOptions } from "apexcharts";
 import { useFinance } from "@/context/FinanceContext"; // Import the context
@@ -14,7 +13,7 @@ export default function PieChart() {
   const { expenses } = useFinance(); // Get expenses from context
 
   // If expenses data is null or undefined, set to an empty array to avoid errors
-  let expenseList = expenses || [];
+  const expenseList = expenses || [];
 
   // Map expenses to series and labels for ApexCharts
   const series = expenseList.map((expense) => parseFloat(expense.cost) || 0);

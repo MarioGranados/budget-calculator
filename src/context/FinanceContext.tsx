@@ -1,8 +1,8 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
 import axios from "@/lib/axios";
-import { useAuth } from "@/context/AuthContext"; // Assuming you have a context for authentication
+import { useAuth } from "@/context/AuthContext"; 
 
 interface Expense {
   name: string;
@@ -23,11 +23,11 @@ export const FinanceProvider = ({ children }: { children: React.ReactNode }) => 
   const [income, setIncome] = useState<number | null>(null);
   const [expenses, setExpenses] = useState<Expense[] | null>(null);
   const [remainingBalance, setRemainingBalance] = useState<number | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
 
-  const { token, isAuthenticated } = useAuth(); // Access token and isAuthenticated from the AuthContext
+  const { token, isAuthenticated } = useAuth(); 
 
-  const fetchFinanceData = async () => {
+  // Memoize the fetchFinanceData function to prevent unnecessary re-renders
+  const fetchFinanceData = useCallback(async () => {
     if (!isAuthenticated) {
       // If the user is not authenticated, get data from localStorage
       const storedIncome = localStorage.getItem("income");
@@ -38,7 +38,6 @@ export const FinanceProvider = ({ children }: { children: React.ReactNode }) => 
       setIncome(storedIncome ? parseFloat(storedIncome) : 0);
       setExpenses(storedExpenses ? JSON.parse(storedExpenses) : []);
       setRemainingBalance(storedBalance ? parseFloat(storedBalance) : 0);
-      setLoading(false);
       return;
     }
 
@@ -64,12 +63,11 @@ export const FinanceProvider = ({ children }: { children: React.ReactNode }) => 
       setExpenses(storedExpenses ? JSON.parse(storedExpenses) : []);
       setRemainingBalance(storedBalance ? parseFloat(storedBalance) : 0);
     }
-    setLoading(false);
-  };
+  }, [isAuthenticated, token]); // Dependencies for fetchFinanceData
 
   useEffect(() => {
     fetchFinanceData();
-  }, [isAuthenticated, token]); // Re-run fetchFinanceData when authentication state changes
+  }, [fetchFinanceData]); // Re-run fetchFinanceData when it changes
 
   return (
     <FinanceContext.Provider value={{ income, expenses, remainingBalance, fetchFinanceData }}>

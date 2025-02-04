@@ -27,8 +27,12 @@ const VerifyEmail = () => {
       if (response.status === 200) {
         router.push("/"); // Redirect after successful verification
       }
-    } catch (err: any) {
-      setError(err.response?.data?.message || "Error verifying email");
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message || "Error verifying email");
+      } else {
+        setError("Error verifying email");
+      }
     } finally {
       setLoading(false);
     }
@@ -40,19 +44,25 @@ const VerifyEmail = () => {
     setMessage("");
 
     try {
-      const response = await axios.post("/api/users/resend-verification-code", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await axios.post(
+        "/api/users/resend-verification-code",
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       if (response.status === 200) {
         setMessage("A new verification code has been sent to your email.");
       }
-    } catch (err: any) {
-      setError(
-        err.response?.data?.message || "Error resending verification code"
-      );
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message || "Error resending verification code");
+      } else {
+        setError("Error resending verification code");
+      }
     } finally {
       setResendLoading(false);
     }
@@ -82,7 +92,7 @@ const VerifyEmail = () => {
         </button>
 
         <p className="text-center text-gray-500 text-sm mt-3">
-          Didn't receive a code?{" "}
+          Did not receive a code?
           <button
             onClick={handleResendCode}
             className="text-blue-500 cursor-pointer hover:underline"

@@ -42,9 +42,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (err instanceof Error) {
         console.error("Failed to fetch user data:", err.message);
       } else {
-        console.error("Failed to fetch user data:", err);
+        console.error("Failed to fetch user data:", String(err));
       }
-      setUser(null); // Set user to null in case of an error
+      setUser(null); // Set user to null for errors
     }
   };
 
@@ -61,11 +61,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       // Set token and user
       setToken(response.data.token);
       setUser(response.data.user);
-    } catch (err: any) {
+    } catch (err: unknown) {
       if (err instanceof Error) {
         console.error("Login failed:", err.message);
       } else {
-        console.error("Login failed:", err);
+        console.error("Login failed:", String(err));
       }
     }
   };

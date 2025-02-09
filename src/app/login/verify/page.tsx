@@ -12,7 +12,7 @@ const VerifyEmail = () => {
   const [resendLoading, setResendLoading] = useState(false);
   const [message, setMessage] = useState("");
   const router = useRouter();
-  const { token } = useAuth(); // Use the login function from AuthContext
+  const { token, user } = useAuth(); // Use the login function from AuthContext
 
   const handleVerify = async () => {
     setLoading(true);

@@ -81,9 +81,15 @@ const ChartPage = () => {
           {/* Inputs Section */}
           <div className="flex-1 p-5 rounded-lg shadow-lg">
             <div className="text-center">
-              <h2 className="text-xl font-semibold">   {user ? `${user.username.charAt(0).toUpperCase()}${user.username.slice(1)}` : ''} Expense Data
-
-</h2>
+              <h2 className="text-xl font-semibold">
+                {" "}
+                {user
+                  ? `${user.username
+                      .charAt(0)
+                      .toUpperCase()}${user.username.slice(1)}`
+                  : ""}{" "}
+                Expense Data
+              </h2>
               <div>
                 <strong>Total Expenses:</strong> {formatCurrency(totalExpenses)}
               </div>
@@ -99,7 +105,6 @@ const ChartPage = () => {
                   Clear Data & Go Home
                 </button>
               )}
-
             </div>
           </div>
 

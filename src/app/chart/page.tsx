@@ -16,7 +16,7 @@ const PieChart = dynamic(() => import("../../components/PieChart"), {
 
 const ChartPage = () => {
   const { income, expenses, fetchFinanceData } = useFinance(); // Get income and expenses from context
-  const { isAuthenticated } = useAuth(); // Get authentication status from context
+  const { isAuthenticated, user } = useAuth(); // Get authentication status from context
   const router = useRouter();
   const [remainingBalance, setRemainingBalance] = useState<number | null>(null);
   const [totalExpenses, setTotalExpenses] = useState<number | null>(null);
@@ -52,8 +52,10 @@ const ChartPage = () => {
   }, [income, expenses]); // Trigger effect when income or expenses change
 
   const clearDataAndGoHome = () => {
-    localStorage.clear(); // Clear data after redirect
-    router.push("/"); // Redirect first
+    if (!isAuthenticated) {
+      localStorage.clear(); // Clear data after redirect
+      router.push("/"); // Redirect first
+    }
   };
 
   // Function to format numbers in USD format
@@ -62,7 +64,12 @@ const ChartPage = () => {
   };
 
   // If data isn't available yet, display a loading state
-  if (income === null || expenses === null || remainingBalance === null || totalExpenses === null) {
+  if (
+    income === null ||
+    expenses === null ||
+    remainingBalance === null ||
+    totalExpenses === null
+  ) {
     return <div>Loading...</div>; // Show loading state until the data is available
   }
 
@@ -74,7 +81,9 @@ const ChartPage = () => {
           {/* Inputs Section */}
           <div className="flex-1 p-5 rounded-lg shadow-lg">
             <div className="text-center">
-              <h2 className="text-xl font-semibold">Expense Data</h2>
+              <h2 className="text-xl font-semibold">   {user ? `${user.username.charAt(0).toUpperCase()}${user.username.slice(1)}` : ''} Expense Data
+
+</h2>
               <div>
                 <strong>Total Expenses:</strong> {formatCurrency(totalExpenses)}
               </div>
@@ -82,12 +91,15 @@ const ChartPage = () => {
                 <strong>Remaining Balance After Expenses:</strong>{" "}
                 {formatCurrency(remainingBalanceAfterExpenses)}
               </div>
-              <button
-                onClick={clearDataAndGoHome}
-                className="mt-4 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
-              >
-                Clear Data & Go Home
-              </button>
+              {!isAuthenticated && (
+                <button
+                  onClick={clearDataAndGoHome}
+                  className="mt-4 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+                >
+                  Clear Data & Go Home
+                </button>
+              )}
+
             </div>
           </div>
 
@@ -99,17 +111,35 @@ const ChartPage = () => {
 
         <div className="my-10 mx-10 space-y-4">
           <p>
-            If you are using this tool, know that I am not a financial advisor and don&apos;t have any credentials. I built this tool to estimate my yearly financial goals and explore different investment strategies for myself. This tool was created for my situation, but feel free to use it as you see fit.
+            If you are using this tool, know that I am not a financial advisor
+            and don&apos;t have any credentials. I built this tool to estimate
+            my yearly financial goals and explore different investment
+            strategies for myself. This tool was created for my situation, but
+            feel free to use it as you see fit.
           </p>
           <p>
-            If you would like to modify the code or use it for yourself, you can do so 
-            <a href="http://" className="text-blue-500 hover:underline"> here</a>.
+            If you would like to modify the code or use it for yourself, you can
+            do so
+            <a href="http://" className="text-blue-500 hover:underline">
+              {" "}
+              here
+            </a>
+            .
           </p>
           <p>The graph below shows:</p>
           <ul className="list-disc pl-5 space-y-2">
-            <li>Expense over 12 months - mostly just used to see how much I spend a year</li>
-            <li>Income after expenses over 12 months - I use this to determine my needs and wants</li>
-            <li>Contribution to a savings account - I was recommended to save 15% of my income, feel free to change it via the slider</li>
+            <li>
+              Expense over 12 months - mostly just used to see how much I spend
+              a year
+            </li>
+            <li>
+              Income after expenses over 12 months - I use this to determine my
+              needs and wants
+            </li>
+            <li>
+              Contribution to a savings account - I was recommended to save 15%
+              of my income, feel free to change it via the slider
+            </li>
           </ul>
         </div>
 

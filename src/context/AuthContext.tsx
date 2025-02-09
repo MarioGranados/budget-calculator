@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 interface User {
   id: string;
   email: string;
-  name: string;
+  username: string;
 }
 
 interface AuthContextType {
@@ -26,8 +26,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
-    if (storedToken) {
+    const storedUser = localStorage.getItem("user");
+
+    if (storedToken && storedUser) {
+      setUser(JSON.parse(storedUser) as User);
       setToken(storedToken);
+    } else if (storedToken && !storedUser) {
       fetchUserData(storedToken); // Fetch user data if token exists
     }
   }, []);
@@ -38,13 +42,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         headers: { Authorization: `Bearer ${token}` },
       });
       setUser(response.data.user);
+      localStorage.setItem("user", JSON.stringify(response.data.user)); // Store user correctly
     } catch (err: unknown) {
-      if (err instanceof Error) {
-        console.error("Failed to fetch user data:", err.message);
-      } else {
-        console.error("Failed to fetch user data:", String(err));
-      }
-      setUser(null); // Set user to null for errors
+      console.error("Failed to fetch user data:", err);
+      setUser(null);
     }
   };
 
@@ -55,26 +56,23 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         password,
       });
 
-      // Store token in localStorage
+      // Store token and user in localStorage
       localStorage.setItem("token", response.data.token);
+      localStorage.setItem("user", JSON.stringify(response.data.user));
 
-      // Set token and user
       setToken(response.data.token);
       setUser(response.data.user);
     } catch (err: unknown) {
-      if (err instanceof Error) {
-        console.error("Login failed:", err.message);
-      } else {
-        console.error("Login failed:", String(err));
-      }
+      console.error("Login failed:", err);
     }
   };
 
   const logout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("user");
     setToken(null);
     setUser(null);
-    router.push("/login"); // Redirect to login page
+    router.push("/login");
   };
 
   const isAuthenticated = !!token && !!user;
